@@ -4,32 +4,19 @@ import { useState } from "react";
 import { useStepper } from "@/app/context/StepperContext";
 import { useCreateAccountStore } from "@/app/store/createAccountStore";
 
-const MOCKED_EMAILS = [
-    "user1@example.com",
-    "user2@example.com",
-    "user3@example.com",
-    "test@example.com",
-    "admin@example.com"
-];
-
 export default function Step1() {
     const { email, password, isMagicLink, setEmail, setPassword, setIsMagicLink } = useCreateAccountStore();
     const [error, setError] = useState("");
     const [passwordError, setPasswordError] = useState("");
-    const { setStepValid } = useStepper();
+    const { setStepValid, validateEmail } = useStepper();
 
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newEmail = e.target.value;
         setEmail(newEmail);
 
-        if (!newEmail) {
-            setError("Email is required");
-            setStepValid(1, false);
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-            setError("Please enter a valid email address");
-            setStepValid(1, false);
-        } else if (MOCKED_EMAILS.includes(newEmail)) {
-            setError("This email is not allowed");
+        const validationResult = validateEmail(newEmail);
+        if (!validationResult.isValid) {
+            setError(validationResult.error || "");
             setStepValid(1, false);
         } else {
             setError("");
@@ -69,12 +56,8 @@ export default function Step1() {
     };
 
     const validateStep = (email: string, password: string, isMagicLink: boolean) => {
-        if (!email) {
-            setStepValid(1, false);
-            return;
-        }
-
-        if (MOCKED_EMAILS.includes(email)) {
+        const emailValidation = validateEmail(email);
+        if (!emailValidation.isValid) {
             setStepValid(1, false);
             return;
         }

@@ -3,6 +3,14 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 
+const MOCKED_EMAILS = [
+    "user1@example.com",
+    "user2@example.com",
+    "user3@example.com",
+    "test@example.com",
+    "admin@example.com"
+];
+
 interface StepInfo {
     number: number;
     link: string;
@@ -19,6 +27,7 @@ interface StepperContextType {
     steps: StepInfo[];
     isStepValid: (step: number) => boolean;
     setStepValid: (step: number, isValid: boolean) => void;
+    validateEmail: (email: string) => { isValid: boolean; error?: string };
 }
 
 const StepperContext = createContext<StepperContextType | undefined>(undefined);
@@ -47,6 +56,19 @@ export function StepperProvider({ children }: { children: ReactNode }) {
             ...prev,
             [step]: isValid
         }));
+    };
+
+    const validateEmail = (email: string) => {
+        if (!email) {
+            return { isValid: false, error: "Email is required" };
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return { isValid: false, error: "Please enter a valid email address" };
+        }
+        if (MOCKED_EMAILS.includes(email)) {
+            return { isValid: false, error: "This email is not allowed" };
+        }
+        return { isValid: true };
     };
 
     const goToNextStep = () => {
@@ -84,7 +106,8 @@ export function StepperProvider({ children }: { children: ReactNode }) {
             goToStep,
             steps,
             isStepValid,
-            setStepValid
+            setStepValid,
+            validateEmail
         }}>
             {children}
         </StepperContext.Provider>

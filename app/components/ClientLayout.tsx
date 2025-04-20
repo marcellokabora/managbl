@@ -29,16 +29,36 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     {/* Steps */}
                     <div className="flex items-center gap-2">
                         {steps.map((step) => (
-                            <a
-                                key={step.number}
-                                href={step.link}
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    goToStep(step.number);
-                                }}
-                                className={`w-12 h-4 rounded-sm hover:bg-gray-400 cursor-pointer transition-colors ${currentStep === step.number ? 'bg-blue-600' : 'bg-gray-300'
-                                    }`}
-                            />
+                            <div key={step.number} className="flex flex-col items-center group relative">
+                                <a
+                                    href={step.link}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        goToStep(step.number);
+                                    }}
+                                    className={`rounded-sm flex items-center justify-center text-sm font-medium transition-all hover:scale-105 ${currentStep === step.number
+                                        ? 'bg-blue-600 text-white px-4'
+                                        : currentStep > step.number
+                                            ? 'bg-green-500 text-white'
+                                            : 'bg-gray-200 text-gray-600'
+                                        } ${currentStep === step.number ? 'w-auto' : 'w-12 h-12'}`}
+                                >
+                                    {currentStep === step.number ? (
+                                        <div className="flex items-center gap-2 py-2">
+                                            <span className="font-bold">{step.number}</span>
+                                            <span className="text-sm">{step.title}</span>
+                                        </div>
+                                    ) : (
+                                        step.number
+                                    )}
+                                </a>
+
+                                {/* Hover Tooltip */}
+                                <div className="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-lg p-2 shadow-lg min-w-[200px]">
+                                    <div className="font-semibold mb-1">{step.title}</div>
+                                    <div className="text-gray-300">{step.subtitle}</div>
+                                </div>
+                            </div>
                         ))}
                     </div>
 
