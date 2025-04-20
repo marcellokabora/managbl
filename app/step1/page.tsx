@@ -4,14 +4,36 @@ import { useState, useEffect } from "react";
 import { useStepper } from "@/app/context/StepperContext";
 import { useCreateAccountStore } from "@/app/store/createAccountStore";
 
+const MOCKED_EMAILS = [
+    "user1@example.com",
+    "user2@example.com",
+    "user3@example.com",
+    "test@example.com",
+    "admin@example.com"
+];
+
+const validateEmail = (email: string) => {
+    if (!email) {
+        return { isValid: false, error: "Email is required" };
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return { isValid: false, error: "Please enter a valid email address" };
+    }
+    if (MOCKED_EMAILS.includes(email)) {
+        return { isValid: false, error: "This email is not allowed" };
+    }
+    return { isValid: true };
+};
+
 export default function Step1() {
     const { email, password, isMagicLink, setEmail, setPassword, setIsMagicLink } = useCreateAccountStore();
     const [error, setError] = useState("");
     const [passwordError, setPasswordError] = useState("");
-    const { setStepValid, validateEmail } = useStepper();
+    const { setStepValid } = useStepper();
+
+    const emailValidation = validateEmail(email);
 
     const validateStep = (email: string, password: string, isMagicLink: boolean) => {
-        const emailValidation = validateEmail(email);
         if (!emailValidation.isValid) {
             setStepValid(1, false);
             return;

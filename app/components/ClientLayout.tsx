@@ -10,13 +10,21 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     const { currentStep, goToNextStep, goToPreviousStep, goToStep, steps, totalSteps, isStepValid } = useStepper();
     const currentStepInfo = steps.find(step => step.number === currentStep);
     const [isLoading, setIsLoading] = useState(true);
+    const [isMounted, setIsMounted] = useState(false);
 
     // Get store values
     const { email, password, isMagicLink } = useCreateAccountStore();
     const { businessName, phoneNumber, numberOfUnits, businessType } = useBusinessDetailsStore();
 
+    // Handle mounting and hydration
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
     // Check if stores are hydrated
     useEffect(() => {
+        if (!isMounted) return;
+
         console.log('Current step:', currentStep);
         console.log('Store values:', {
             email, password, isMagicLink,
@@ -38,7 +46,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             console.log('Other step, no loading needed');
             setIsLoading(false);
         }
-    }, [currentStep, email, password, isMagicLink, businessName, phoneNumber, numberOfUnits, businessType]);
+    }, [currentStep, email, password, isMagicLink, businessName, phoneNumber, numberOfUnits, businessType, isMounted]);
+
+    // Don't render anything until mounted to prevent hydration mismatch
+    if (!isMounted) {
+        return null;
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -70,14 +83,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                                     href={step.link}
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        goToStep(step.number);
+                                        if (currentStep === step.number || isStepValid(step.number)) {
+                                            goToStep(step.number);
+                                        }
                                     }}
-                                    className={`rounded-sm flex items-center justify-center text-sm font-medium transition-all hover:scale-105 ${currentStep === step.number
+                                    className={`rounded-sm flex items-center justify-center text-sm font-medium transition-all ${currentStep === step.number
                                         ? 'bg-blue-600 text-white px-4'
                                         : currentStep > step.number
                                             ? 'bg-green-500 text-white'
                                             : 'bg-gray-200 text-gray-600'
-                                        } ${currentStep === step.number ? 'w-auto' : 'w-12 h-12'}`}
+                                        } ${currentStep === step.number ? 'w-auto' : 'w-12 h-12'} ${!isStepValid(step.number) && currentStep !== step.number ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
                                 >
                                     {currentStep === step.number ? (
                                         <div className="flex items-center gap-2 py-2">

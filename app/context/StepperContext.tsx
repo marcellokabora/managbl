@@ -27,7 +27,6 @@ interface StepperContextType {
     steps: StepInfo[];
     isStepValid: (step: number) => boolean;
     setStepValid: (step: number, isValid: boolean) => void;
-    validateEmail: (email: string) => { isValid: boolean; error?: string };
 }
 
 const StepperContext = createContext<StepperContextType | undefined>(undefined);
@@ -67,19 +66,6 @@ export function StepperProvider({ children }: { children: ReactNode }) {
         }));
     };
 
-    const validateEmail = (email: string) => {
-        if (!email) {
-            return { isValid: false, error: "Email is required" };
-        }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            return { isValid: false, error: "Please enter a valid email address" };
-        }
-        if (MOCKED_EMAILS.includes(email)) {
-            return { isValid: false, error: "This email is not allowed" };
-        }
-        return { isValid: true };
-    };
-
     const goToNextStep = () => {
         if (currentStep < totalSteps && isStepValid(currentStep)) {
             const nextStep = currentStep + 1;
@@ -115,8 +101,7 @@ export function StepperProvider({ children }: { children: ReactNode }) {
             goToStep,
             steps,
             isStepValid,
-            setStepValid,
-            validateEmail
+            setStepValid
         }}>
             {children}
         </StepperContext.Provider>
