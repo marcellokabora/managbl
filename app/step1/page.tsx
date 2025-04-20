@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useStepper } from "../context/StepperContext";
+import { useStepper } from "@/app/context/StepperContext";
+import { useCreateAccountStore } from "@/app/store/createAccountStore";
 
 const MOCKED_EMAILS = [
     "user1@example.com",
@@ -12,9 +13,7 @@ const MOCKED_EMAILS = [
 ];
 
 export default function Step1() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [isMagicLink, setIsMagicLink] = useState(false);
+    const { email, password, isMagicLink, setEmail, setPassword, setIsMagicLink } = useCreateAccountStore();
     const [error, setError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const { setStepValid } = useStepper();
