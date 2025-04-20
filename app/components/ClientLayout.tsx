@@ -1,47 +1,11 @@
 "use client";
 
 import { useStepper } from "@/app/context/StepperContext";
-import { useCreateAccountStore } from "@/app/store/createAccountStore";
-import { useBusinessDetailsStore } from "@/app/store/businessDetailsStore";
-import { useState, useEffect, Suspense } from "react";
 import Loading from "@/app/components/Loading";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-    const { currentStep, goToNextStep, goToPreviousStep, goToStep, steps, totalSteps, isStepValid } = useStepper();
+    const { currentStep, goToNextStep, goToPreviousStep, goToStep, steps, totalSteps, isStepValid, isLoading } = useStepper();
     const currentStepInfo = steps[currentStep - 1];
-    const [isMounted, setIsMounted] = useState(false);
-
-    // Get store values
-    const { email, password, isMagicLink } = useCreateAccountStore();
-    const { businessName, phoneNumber, numberOfUnits, businessType } = useBusinessDetailsStore();
-
-    // Handle mounting
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    // Check if stores are hydrated
-    useEffect(() => {
-        if (!isMounted) return;
-
-        if (currentStep === 1) {
-            if (email !== undefined && password !== undefined && isMagicLink !== undefined) {
-                console.log('Step 1 store hydrated');
-            }
-        } else if (currentStep === 2) {
-            if (businessName !== undefined && phoneNumber !== undefined &&
-                numberOfUnits !== undefined && businessType !== undefined) {
-                console.log('Step 2 store hydrated');
-            }
-        } else {
-            console.log('Other step, no loading needed');
-        }
-    }, [currentStep, email, password, isMagicLink, businessName, phoneNumber, numberOfUnits, businessType, isMounted]);
-
-    // Don't render anything until mounted to prevent hydration mismatch
-    if (!isMounted) {
-        return null;
-    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -57,10 +21,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 </div>
 
                 {/* Content Area */}
-                <div className="bg-white rounded-lg shadow-sm p-6 flex-1 flex items-center justify-center">
-                    <Suspense fallback={<Loading />}>
-                        {children}
-                    </Suspense>
+                <div className="flex-1 w-full bg-white rounded-lg flex items-center justify-center">
+                    <div className="w-full max-w-xl">
+                        {isLoading ? <Loading /> : children}
+                    </div>
                 </div>
 
                 {/* Footer with Steps and Actions */}
@@ -123,7 +87,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                             disabled={!isStepValid(currentStep)}
                             className="px-6 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {currentStep === totalSteps ? 'Finish' : 'Next'}
+                            {currentStep === totalSteps ? 'Confirm' : 'Next'}
                         </button>
                     </div>
                 </div>

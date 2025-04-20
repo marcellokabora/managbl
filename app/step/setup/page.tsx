@@ -96,58 +96,56 @@ export default function Step3() {
     };
 
     return (
-        <div className="max-w-md mx-auto p-6">
-            <form className="space-y-6">
-                <div>
-                    <label htmlFor="announcement" className="block text-sm font-medium text-gray-700 mb-1">
-                        Welcome Announcement
-                    </label>
-                    <textarea
-                        id="announcement"
-                        value={announcement}
-                        onChange={(e) => handleInputChange('announcement', e.target.value)}
-                        onBlur={() => handleBlur('announcement')}
-                        className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 min-h-[100px] ${touched.announcement && errors.announcement ? "border-red-500" : "border-gray-300"
-                            }`}
-                        placeholder="Enter your welcome announcement message"
-                    />
-                    {touched.announcement && errors.announcement && (
-                        <p className="mt-1 text-sm text-red-600">{errors.announcement}</p>
-                    )}
-                </div>
+        <form className="space-y-6">
+            <div>
+                <label htmlFor="announcement" className="block text-sm font-medium text-gray-700 mb-1">
+                    Welcome Announcement
+                </label>
+                <textarea
+                    id="announcement"
+                    value={announcement}
+                    onChange={(e) => handleInputChange('announcement', e.target.value)}
+                    onBlur={() => handleBlur('announcement')}
+                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 min-h-[100px] ${touched.announcement && errors.announcement ? "border-red-500" : "border-gray-300"
+                        }`}
+                    placeholder="Enter your welcome announcement message"
+                />
+                {touched.announcement && errors.announcement && (
+                    <p className="mt-1 text-sm text-red-600">{errors.announcement}</p>
+                )}
+            </div>
 
-                <div>
-                    <label htmlFor="forwardingNumber" className="block text-sm font-medium text-gray-700 mb-1">
-                        Forwarding Number
-                    </label>
-                    <input
-                        type="tel"
-                        id="forwardingNumber"
-                        value={forwardingNumber}
-                        onChange={(e) => handleInputChange('forwardingNumber', e.target.value)}
-                        onBlur={() => handleBlur('forwardingNumber')}
-                        className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${touched.forwardingNumber && errors.forwardingNumber ? "border-red-500" : "border-gray-300"
-                            }`}
-                        placeholder="Enter forwarding phone number"
-                    />
-                    {touched.forwardingNumber && errors.forwardingNumber && (
-                        <p className="mt-1 text-sm text-red-600">{errors.forwardingNumber}</p>
-                    )}
-                </div>
+            <div>
+                <label htmlFor="forwardingNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                    Forwarding Number
+                </label>
+                <input
+                    type="tel"
+                    id="forwardingNumber"
+                    value={forwardingNumber}
+                    onChange={(e) => handleInputChange('forwardingNumber', e.target.value)}
+                    onBlur={() => handleBlur('forwardingNumber')}
+                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${touched.forwardingNumber && errors.forwardingNumber ? "border-red-500" : "border-gray-300"
+                        }`}
+                    placeholder="Enter forwarding phone number"
+                />
+                {touched.forwardingNumber && errors.forwardingNumber && (
+                    <p className="mt-1 text-sm text-red-600">{errors.forwardingNumber}</p>
+                )}
+            </div>
 
-                <div className="flex items-center justify-between">
-                    <button
-                        type="button"
-                        onClick={handleTestConfiguration}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    >
-                        Test Configuration
-                    </button>
-                    {touched.isTested && errors.isTested && (
-                        <p className="text-sm text-red-600">{errors.isTested}</p>
-                    )}
-                </div>
-            </form>
-        </div>
+            <div className="flex items-center justify-between">
+                <button
+                    type="button"
+                    onClick={handleTestConfiguration}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                    Test Configuration
+                </button>
+                {touched.isTested && errors.isTested && (
+                    <p className="text-sm text-red-600">{errors.isTested}</p>
+                )}
+            </div>
+        </form>
     );
 } 

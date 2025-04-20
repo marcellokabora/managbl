@@ -105,54 +105,52 @@ export default function Account() {
     };
 
     return (
-        <div className="max-w-md mx-auto p-6">
-            <form className="space-y-4">
+        <form className="space-y-4">
+            <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address
+                </label>
+                <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={handleEmailChange}
+                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${error ? "border-red-500" : "border-gray-300"
+                        }`}
+                    placeholder="Enter your email"
+                />
+                {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+            </div>
+
+            {!isMagicLink && (
                 <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                        Password (optional)
                     </label>
                     <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={handleEmailChange}
-                        className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${error ? "border-red-500" : "border-gray-300"
-                            }`}
-                        placeholder="Enter your email"
+                        type="password"
+                        id="password"
+                        value={password}
+                        onChange={handlePasswordChange}
+                        className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${passwordError ? "border-red-500" : "border-gray-300"}`}
+                        placeholder="Enter your password"
                     />
-                    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+                    {passwordError && <p className="mt-1 text-sm text-red-600">{passwordError}</p>}
                 </div>
+            )}
 
-                {!isMagicLink && (
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                            Password (optional)
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={handlePasswordChange}
-                            className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${passwordError ? "border-red-500" : "border-gray-300"}`}
-                            placeholder="Enter your password"
-                        />
-                        {passwordError && <p className="mt-1 text-sm text-red-600">{passwordError}</p>}
-                    </div>
-                )}
-
-                <div className="flex items-center space-x-2">
-                    <input
-                        type="checkbox"
-                        id="magicLink"
-                        checked={isMagicLink}
-                        onChange={handleMagicLinkChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="magicLink" className="text-sm text-gray-700">
-                        Use Magic Link instead of password
-                    </label>
-                </div>
-            </form>
-        </div>
+            <div className="flex items-center space-x-2">
+                <input
+                    type="checkbox"
+                    id="magicLink"
+                    checked={isMagicLink}
+                    onChange={handleMagicLinkChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="magicLink" className="text-sm text-gray-700">
+                    Use Magic Link instead of password
+                </label>
+            </div>
+        </form>
     );
 } 
