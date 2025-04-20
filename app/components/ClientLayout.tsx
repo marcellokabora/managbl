@@ -21,16 +21,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 w-full bg-white rounded-lg flex items-center justify-center">
+                <div className="flex-1 w-full bg-transparent sm:bg-white rounded-lg flex items-center justify-center">
                     <div className="w-full max-w-xl">
                         {isLoading ? <Loading /> : children}
                     </div>
                 </div>
 
                 {/* Footer with Steps and Actions */}
-                <div className="mt-4 flex items-center justify-between pt-4">
+                <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
                     {/* Steps */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 w-full sm:w-auto pb-2">
                         {steps.map((step, index) => (
                             <div key={index} className="flex flex-col items-center group relative">
                                 <a
@@ -46,12 +46,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                                         : currentStep > index + 1
                                             ? 'bg-green-500 text-white'
                                             : 'bg-gray-200 text-gray-600'
-                                        } ${currentStep === index + 1 ? 'w-auto' : 'w-12 h-12'} ${!isStepValid(index + 1) && currentStep !== index + 1 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
+                                        } ${currentStep === index + 1 ? 'w-auto' : 'w-12 h-12'} ${!isStepValid(index + 1) && currentStep !== index + 1 ? 'opacity-50 cursor-not-allowed' : 'sm:hover:scale-105'}`}
                                 >
                                     {currentStep === index + 1 ? (
                                         <div className="flex items-center gap-2 py-2">
                                             <span className="font-bold">{index + 1}</span>
-                                            <span className="text-sm">{step.title}</span>
+                                            <span className="text-sm hidden sm:inline">{step.title}</span>
                                         </div>
                                     ) : (
                                         index + 1
@@ -68,11 +68,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 w-full sm:w-auto justify-center sm:justify-end">
                         <button
                             onClick={goToPreviousStep}
                             disabled={currentStep === 1}
-                            className="px-6 py-2 border border-gray-300 rounded-sm text-gray-700 hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 py-2 border border-gray-300 rounded-sm text-gray-700 hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none"
                         >
                             Previous
                         </button>
@@ -85,7 +85,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                                 }
                             }}
                             disabled={!isStepValid(currentStep)}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none"
                         >
                             {currentStep === totalSteps ? 'Confirm' : 'Next'}
                         </button>
