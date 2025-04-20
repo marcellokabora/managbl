@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface BusinessDetailsState {
     businessName: string;
@@ -19,11 +20,20 @@ const initialState = {
     businessType: '',
 };
 
-export const useBusinessDetailsStore = create<BusinessDetailsState>((set) => ({
-    ...initialState,
-    setBusinessName: (name) => set({ businessName: name }),
-    setPhoneNumber: (phone) => set({ phoneNumber: phone }),
-    setNumberOfUnits: (units) => set({ numberOfUnits: units }),
-    setBusinessType: (type) => set({ businessType: type }),
-    reset: () => set(initialState),
-})); 
+export const useBusinessDetailsStore = create<BusinessDetailsState>()(
+    persist(
+        (set) => ({
+            ...initialState,
+            setBusinessName: (name) => set({ businessName: name }),
+            setPhoneNumber: (phone) => set({ phoneNumber: phone }),
+            setNumberOfUnits: (units) => set({ numberOfUnits: units }),
+            setBusinessType: (type) => set({ businessType: type }),
+            reset: () => set(initialState),
+        }),
+        {
+            name: 'business-details-storage',
+            storage: createJSONStorage(() => localStorage),
+            version: 1,
+        }
+    )
+); 

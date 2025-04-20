@@ -11,14 +11,6 @@ export default function Step2() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-    // Add initial validation on mount
-    useEffect(() => {
-        validateField('businessName', businessName);
-        validateField('phoneNumber', phoneNumber);
-        validateField('numberOfUnits', numberOfUnits);
-        validateField('businessType', businessType);
-    }, []);
-
     const validateField = (field: string, value: string | number) => {
         const newErrors = { ...errors };
 
@@ -59,6 +51,17 @@ export default function Step2() {
         const isValid = Object.keys(newErrors).length === 0;
         setStepValid(2, isValid);
     };
+
+    // Add validation when store values change
+    useEffect(() => {
+        if (businessName !== undefined && phoneNumber !== undefined &&
+            numberOfUnits !== undefined && businessType !== undefined) {
+            validateField('businessName', businessName);
+            validateField('phoneNumber', phoneNumber);
+            validateField('numberOfUnits', numberOfUnits);
+            validateField('businessType', businessType);
+        }
+    }, [businessName, phoneNumber, numberOfUnits, businessType]);
 
     const handleInputChange = (field: string, value: string | number) => {
         switch (field) {

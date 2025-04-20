@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 
 const MOCKED_EMAILS = [
     "user1@example.com",
@@ -36,6 +36,7 @@ export function StepperProvider({ children }: { children: ReactNode }) {
     const [currentStep, setCurrentStep] = useState(1);
     const [stepValidation, setStepValidation] = useState<Record<number, boolean>>({});
     const router = useRouter();
+    const pathname = usePathname();
 
     const steps: StepInfo[] = [
         { number: 1, link: '/step1', title: 'Create Account', subtitle: 'Set up your account details' },
@@ -46,6 +47,14 @@ export function StepperProvider({ children }: { children: ReactNode }) {
     ];
 
     const totalSteps = steps.length;
+
+    // Initialize current step based on URL
+    useEffect(() => {
+        const stepFromUrl = steps.findIndex(step => step.link === pathname) + 1;
+        if (stepFromUrl > 0) {
+            setCurrentStep(stepFromUrl);
+        }
+    }, [pathname]);
 
     const isStepValid = (step: number) => {
         return stepValidation[step] === true;

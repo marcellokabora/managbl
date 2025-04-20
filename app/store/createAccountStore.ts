@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface CreateAccountState {
     email: string;
@@ -16,10 +17,19 @@ const initialState = {
     isMagicLink: false,
 };
 
-export const useCreateAccountStore = create<CreateAccountState>((set) => ({
-    ...initialState,
-    setEmail: (email) => set({ email }),
-    setPassword: (password) => set({ password }),
-    setIsMagicLink: (isMagicLink) => set({ isMagicLink }),
-    reset: () => set(initialState),
-})); 
+export const useCreateAccountStore = create<CreateAccountState>()(
+    persist(
+        (set) => ({
+            ...initialState,
+            setEmail: (email) => set({ email }),
+            setPassword: (password) => set({ password }),
+            setIsMagicLink: (isMagicLink) => set({ isMagicLink }),
+            reset: () => set(initialState),
+        }),
+        {
+            name: 'create-account-storage',
+            storage: createJSONStorage(() => localStorage),
+            version: 1,
+        }
+    )
+); 

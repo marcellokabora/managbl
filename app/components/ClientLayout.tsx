@@ -1,10 +1,44 @@
 "use client";
 
 import { useStepper } from "@/app/context/StepperContext";
+import { useCreateAccountStore } from "@/app/store/createAccountStore";
+import { useBusinessDetailsStore } from "@/app/store/businessDetailsStore";
+import { useState, useEffect } from "react";
+import LoadingContent from "@/app/context/LoadingContent";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const { currentStep, goToNextStep, goToPreviousStep, goToStep, steps, totalSteps, isStepValid } = useStepper();
     const currentStepInfo = steps.find(step => step.number === currentStep);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Get store values
+    const { email, password, isMagicLink } = useCreateAccountStore();
+    const { businessName, phoneNumber, numberOfUnits, businessType } = useBusinessDetailsStore();
+
+    // Check if stores are hydrated
+    useEffect(() => {
+        console.log('Current step:', currentStep);
+        console.log('Store values:', {
+            email, password, isMagicLink,
+            businessName, phoneNumber, numberOfUnits, businessType
+        });
+
+        if (currentStep === 1) {
+            if (email !== undefined && password !== undefined && isMagicLink !== undefined) {
+                console.log('Step 1 store hydrated');
+                setIsLoading(false);
+            }
+        } else if (currentStep === 2) {
+            if (businessName !== undefined && phoneNumber !== undefined &&
+                numberOfUnits !== undefined && businessType !== undefined) {
+                console.log('Step 2 store hydrated');
+                setIsLoading(false);
+            }
+        } else {
+            console.log('Other step, no loading needed');
+            setIsLoading(false);
+        }
+    }, [currentStep, email, password, isMagicLink, businessName, phoneNumber, numberOfUnits, businessType]);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -21,7 +55,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
                 {/* Content Area */}
                 <div className="bg-white rounded-lg shadow-sm p-6 flex-1 flex items-center justify-center">
-                    {children}
+                    <LoadingContent currentStep={currentStep}>
+                        {children}
+                    </LoadingContent>
                 </div>
 
                 {/* Footer with Steps and Actions */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStepper } from "@/app/context/StepperContext";
 import { useCreateAccountStore } from "@/app/store/createAccountStore";
 
@@ -9,6 +9,33 @@ export default function Step1() {
     const [error, setError] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const { setStepValid, validateEmail } = useStepper();
+
+    const validateStep = (email: string, password: string, isMagicLink: boolean) => {
+        const emailValidation = validateEmail(email);
+        if (!emailValidation.isValid) {
+            setStepValid(1, false);
+            return;
+        }
+
+        if (!isMagicLink && !password) {
+            setPasswordError("Please set a password or use magic link");
+            setStepValid(1, false);
+            return;
+        }
+
+        if (!isMagicLink && passwordError) {
+            setStepValid(1, false);
+            return;
+        }
+
+        setStepValid(1, true);
+    };
+
+    useEffect(() => {
+        if (email !== undefined && password !== undefined && isMagicLink !== undefined) {
+            validateStep(email, password, isMagicLink);
+        }
+    }, [email, password, isMagicLink]);
 
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newEmail = e.target.value;
@@ -53,27 +80,6 @@ export default function Step1() {
         } else {
             validateStep(email, password, newValue);
         }
-    };
-
-    const validateStep = (email: string, password: string, isMagicLink: boolean) => {
-        const emailValidation = validateEmail(email);
-        if (!emailValidation.isValid) {
-            setStepValid(1, false);
-            return;
-        }
-
-        if (!isMagicLink && !password) {
-            setPasswordError("Please set a password or use magic link");
-            setStepValid(1, false);
-            return;
-        }
-
-        if (!isMagicLink && passwordError) {
-            setStepValid(1, false);
-            return;
-        }
-
-        setStepValid(1, true);
     };
 
     return (
