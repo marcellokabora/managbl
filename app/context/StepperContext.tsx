@@ -3,14 +3,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
-const MOCKED_EMAILS = [
-    "user1@example.com",
-    "user2@example.com",
-    "user3@example.com",
-    "test@example.com",
-    "admin@example.com"
-];
-
 interface StepInfo {
     number: number;
     link: string;
