@@ -4,7 +4,6 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import { useRouter, usePathname } from 'next/navigation';
 
 interface StepInfo {
-    number: number;
     link: string;
     title: string;
     subtitle: string;
@@ -30,11 +29,10 @@ export function StepperProvider({ children }: { children: ReactNode }) {
     const pathname = usePathname();
 
     const steps: StepInfo[] = [
-        { number: 1, link: '/step1', title: 'Create Account', subtitle: 'Set up your account details' },
-        { number: 2, link: '/step2', title: 'Basic Information', subtitle: 'Enter your name, phone number, and number of units' },
-        { number: 3, link: '/step3', title: 'Phone Configuration', subtitle: 'Set up initial phone answering settings' },
-        { number: 4, link: '/step4', title: 'Admin Access', subtitle: 'Complete setup and access admin dashboard' },
-        // { number: 5, link: '/step5', title: 'Review', subtitle: 'Review and confirm your information' }
+        { link: '/step/account', title: 'Account', subtitle: 'Set up your account details' },
+        { link: '/step/information', title: 'Basic Information', subtitle: 'Enter your name, phone number, and number of units' },
+        { link: '/step/setup', title: 'Phone Configuration', subtitle: 'Set up initial phone answering settings' },
+        { link: '/step/review', title: 'Admin Access', subtitle: 'Complete setup and access admin dashboard' },
     ];
 
     const totalSteps = steps.length;
@@ -43,6 +41,11 @@ export function StepperProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const stepFromUrl = steps.findIndex(step => step.link === pathname) + 1;
         if (stepFromUrl > 0) {
+            // If trying to access any step other than step 1 directly, redirect to step 1
+            if (stepFromUrl > 1 && !isStepValid(1)) {
+                router.push('/step/account');
+                return;
+            }
             setCurrentStep(stepFromUrl);
         }
     }, [pathname]);
@@ -62,7 +65,7 @@ export function StepperProvider({ children }: { children: ReactNode }) {
         if (currentStep < totalSteps && isStepValid(currentStep)) {
             const nextStep = currentStep + 1;
             setCurrentStep(nextStep);
-            router.push(steps[nextStep - 1].link);
+            router.push(steps[nextStep - 1].link, { scroll: false });
         }
     };
 
@@ -70,7 +73,7 @@ export function StepperProvider({ children }: { children: ReactNode }) {
         if (currentStep > 1) {
             const prevStep = currentStep - 1;
             setCurrentStep(prevStep);
-            router.push(steps[prevStep - 1].link);
+            router.push(steps[prevStep - 1].link, { scroll: false });
         }
     };
 
@@ -79,7 +82,7 @@ export function StepperProvider({ children }: { children: ReactNode }) {
             // Allow going back to previous steps without validation
             if (step < currentStep || isStepValid(currentStep)) {
                 setCurrentStep(step);
-                router.push(steps[step - 1].link);
+                router.push(steps[step - 1].link, { scroll: false });
             }
         }
     };

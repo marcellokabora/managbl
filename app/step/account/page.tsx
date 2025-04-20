@@ -25,7 +25,7 @@ const validateEmail = (email: string) => {
     return { isValid: true };
 };
 
-export default function Step1() {
+export default function Account() {
     const { email, password, isMagicLink, setEmail, setPassword, setIsMagicLink } = useCreateAccountStore();
     const [error, setError] = useState("");
     const [passwordError, setPasswordError] = useState("");

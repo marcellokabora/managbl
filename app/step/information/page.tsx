@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useStepper } from "@/app/context/StepperContext";
 import { useBusinessDetailsStore } from "@/app/store/businessDetailsStore";
 
-export default function Step2() {
+export default function Information() {
     const { businessName, phoneNumber, numberOfUnits, businessType,
         setBusinessName, setPhoneNumber, setNumberOfUnits, setBusinessType } = useBusinessDetailsStore();
     const { setStepValid } = useStepper();

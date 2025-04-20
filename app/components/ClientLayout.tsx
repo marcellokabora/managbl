@@ -3,20 +3,19 @@
 import { useStepper } from "@/app/context/StepperContext";
 import { useCreateAccountStore } from "@/app/store/createAccountStore";
 import { useBusinessDetailsStore } from "@/app/store/businessDetailsStore";
-import { useState, useEffect } from "react";
-import LoadingContent from "@/app/context/LoadingContent";
+import { useState, useEffect, Suspense } from "react";
+import Loading from "@/app/components/Loading";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const { currentStep, goToNextStep, goToPreviousStep, goToStep, steps, totalSteps, isStepValid } = useStepper();
-    const currentStepInfo = steps.find(step => step.number === currentStep);
-    const [isLoading, setIsLoading] = useState(true);
+    const currentStepInfo = steps[currentStep - 1];
     const [isMounted, setIsMounted] = useState(false);
 
     // Get store values
     const { email, password, isMagicLink } = useCreateAccountStore();
     const { businessName, phoneNumber, numberOfUnits, businessType } = useBusinessDetailsStore();
 
-    // Handle mounting and hydration
+    // Handle mounting
     useEffect(() => {
         setIsMounted(true);
     }, []);
@@ -25,26 +24,17 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     useEffect(() => {
         if (!isMounted) return;
 
-        console.log('Current step:', currentStep);
-        console.log('Store values:', {
-            email, password, isMagicLink,
-            businessName, phoneNumber, numberOfUnits, businessType
-        });
-
         if (currentStep === 1) {
             if (email !== undefined && password !== undefined && isMagicLink !== undefined) {
                 console.log('Step 1 store hydrated');
-                setIsLoading(false);
             }
         } else if (currentStep === 2) {
             if (businessName !== undefined && phoneNumber !== undefined &&
                 numberOfUnits !== undefined && businessType !== undefined) {
                 console.log('Step 2 store hydrated');
-                setIsLoading(false);
             }
         } else {
             console.log('Other step, no loading needed');
-            setIsLoading(false);
         }
     }, [currentStep, email, password, isMagicLink, businessName, phoneNumber, numberOfUnits, businessType, isMounted]);
 
@@ -68,39 +58,39 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
                 {/* Content Area */}
                 <div className="bg-white rounded-lg shadow-sm p-6 flex-1 flex items-center justify-center">
-                    <LoadingContent currentStep={currentStep}>
+                    <Suspense fallback={<Loading />}>
                         {children}
-                    </LoadingContent>
+                    </Suspense>
                 </div>
 
                 {/* Footer with Steps and Actions */}
                 <div className="mt-4 flex items-center justify-between pt-4">
                     {/* Steps */}
                     <div className="flex items-center gap-2">
-                        {steps.map((step) => (
-                            <div key={step.number} className="flex flex-col items-center group relative">
+                        {steps.map((step, index) => (
+                            <div key={index} className="flex flex-col items-center group relative">
                                 <a
                                     href={step.link}
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        if (currentStep === step.number || isStepValid(step.number)) {
-                                            goToStep(step.number);
+                                        if (currentStep === index + 1 || isStepValid(index + 1)) {
+                                            goToStep(index + 1);
                                         }
                                     }}
-                                    className={`rounded-sm flex items-center justify-center text-sm font-medium transition-all ${currentStep === step.number
+                                    className={`rounded-sm flex items-center justify-center text-sm font-medium transition-all ${currentStep === index + 1
                                         ? 'bg-blue-600 text-white px-4'
-                                        : currentStep > step.number
+                                        : currentStep > index + 1
                                             ? 'bg-green-500 text-white'
                                             : 'bg-gray-200 text-gray-600'
-                                        } ${currentStep === step.number ? 'w-auto' : 'w-12 h-12'} ${!isStepValid(step.number) && currentStep !== step.number ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
+                                        } ${currentStep === index + 1 ? 'w-auto' : 'w-12 h-12'} ${!isStepValid(index + 1) && currentStep !== index + 1 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
                                 >
-                                    {currentStep === step.number ? (
+                                    {currentStep === index + 1 ? (
                                         <div className="flex items-center gap-2 py-2">
-                                            <span className="font-bold">{step.number}</span>
+                                            <span className="font-bold">{index + 1}</span>
                                             <span className="text-sm">{step.title}</span>
                                         </div>
                                     ) : (
-                                        step.number
+                                        index + 1
                                     )}
                                 </a>
 
