@@ -1,0 +1,100 @@
+"use client";
+
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+
+interface StepInfo {
+    number: number;
+    link: string;
+    title: string;
+    subtitle: string;
+}
+
+interface StepperContextType {
+    currentStep: number;
+    totalSteps: number;
+    goToNextStep: () => void;
+    goToPreviousStep: () => void;
+    goToStep: (step: number) => void;
+    steps: StepInfo[];
+    isStepValid: (step: number) => boolean;
+    setStepValid: (step: number, isValid: boolean) => void;
+}
+
+const StepperContext = createContext<StepperContextType | undefined>(undefined);
+
+export function StepperProvider({ children }: { children: ReactNode }) {
+    const [currentStep, setCurrentStep] = useState(1);
+    const [stepValidation, setStepValidation] = useState<Record<number, boolean>>({});
+    const router = useRouter();
+
+    const steps: StepInfo[] = [
+        { number: 1, link: '/step1', title: 'Create Account', subtitle: 'Set up your account details' },
+        { number: 2, link: '/step2', title: 'Basic Information', subtitle: 'Enter your name, phone number, and number of units' },
+        { number: 3, link: '/step3', title: 'Phone Configuration', subtitle: 'Set up initial phone answering settings' },
+        { number: 4, link: '/step4', title: 'Admin Access', subtitle: 'Complete setup and access admin dashboard' },
+        // { number: 5, link: '/step5', title: 'Review', subtitle: 'Review and confirm your information' }
+    ];
+
+    const totalSteps = steps.length;
+
+    const isStepValid = (step: number) => {
+        return stepValidation[step] === true;
+    };
+
+    const setStepValid = (step: number, isValid: boolean) => {
+        setStepValidation(prev => ({
+            ...prev,
+            [step]: isValid
+        }));
+    };
+
+    const goToNextStep = () => {
+        if (currentStep < totalSteps && isStepValid(currentStep)) {
+            const nextStep = currentStep + 1;
+            setCurrentStep(nextStep);
+            router.push(steps[nextStep - 1].link);
+        }
+    };
+
+    const goToPreviousStep = () => {
+        if (currentStep > 1) {
+            const prevStep = currentStep - 1;
+            setCurrentStep(prevStep);
+            router.push(steps[prevStep - 1].link);
+        }
+    };
+
+    const goToStep = (step: number) => {
+        if (step >= 1 && step <= totalSteps) {
+            // Allow going back to previous steps without validation
+            if (step < currentStep || isStepValid(currentStep)) {
+                setCurrentStep(step);
+                router.push(steps[step - 1].link);
+            }
+        }
+    };
+
+    return (
+        <StepperContext.Provider value={{
+            currentStep,
+            totalSteps,
+            goToNextStep,
+            goToPreviousStep,
+            goToStep,
+            steps,
+            isStepValid,
+            setStepValid
+        }}>
+            {children}
+        </StepperContext.Provider>
+    );
+}
+
+export function useStepper() {
+    const context = useContext(StepperContext);
+    if (context === undefined) {
+        throw new Error('useStepper must be used within a StepperProvider');
+    }
+    return context;
+} 
