@@ -18,7 +18,6 @@ interface StepperContextType {
     steps: StepInfo[];
     isStepValid: (step: number) => boolean;
     setStepValid: (step: number, isValid: boolean) => void;
-    isLoading: boolean;
 }
 
 const StepperContext = createContext<StepperContextType | undefined>(undefined);
@@ -26,7 +25,6 @@ const StepperContext = createContext<StepperContextType | undefined>(undefined);
 export function StepperProvider({ children }: { children: ReactNode }) {
     const [currentStep, setCurrentStep] = useState(1);
     const [stepValidation, setStepValidation] = useState<Record<number, boolean>>({});
-    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
 
@@ -65,7 +63,6 @@ export function StepperProvider({ children }: { children: ReactNode }) {
 
     const goToNextStep = () => {
         if (currentStep < totalSteps && isStepValid(currentStep)) {
-            setIsLoading(true);
             const nextStep = currentStep + 1;
             setCurrentStep(nextStep);
             router.push(steps[nextStep - 1].link, { scroll: false });
@@ -74,7 +71,6 @@ export function StepperProvider({ children }: { children: ReactNode }) {
 
     const goToPreviousStep = () => {
         if (currentStep > 1) {
-            setIsLoading(true);
             const prevStep = currentStep - 1;
             setCurrentStep(prevStep);
             router.push(steps[prevStep - 1].link, { scroll: false });
@@ -84,17 +80,11 @@ export function StepperProvider({ children }: { children: ReactNode }) {
     const goToStep = (step: number) => {
         if (step >= 1 && step <= totalSteps) {
             if (step < currentStep || isStepValid(currentStep)) {
-                setIsLoading(true);
                 setCurrentStep(step);
                 router.push(steps[step - 1].link, { scroll: false });
             }
         }
     };
-
-    // Reset loading state when pathname changes
-    useEffect(() => {
-        setIsLoading(false);
-    }, [pathname]);
 
     return (
         <StepperContext.Provider value={{
@@ -105,8 +95,7 @@ export function StepperProvider({ children }: { children: ReactNode }) {
             goToStep,
             steps,
             isStepValid,
-            setStepValid,
-            isLoading
+            setStepValid
         }}>
             {children}
         </StepperContext.Provider>

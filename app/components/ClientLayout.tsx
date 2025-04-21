@@ -1,10 +1,11 @@
 "use client";
 
 import { useStepper } from "@/app/context/StepperContext";
-import Loading from "@/app/components/Loading";
+import { Suspense } from "react";
+import Loading from "./Loading";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
-    const { currentStep, goToNextStep, goToPreviousStep, goToStep, steps, totalSteps, isStepValid, isLoading } = useStepper();
+    const { currentStep, goToNextStep, goToPreviousStep, goToStep, steps, totalSteps, isStepValid } = useStepper();
     const currentStepInfo = steps[currentStep - 1];
 
     return (
@@ -21,9 +22,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 w-full bg-transparent sm:bg-white rounded-lg flex items-center justify-center">
+                <div className="flex-1 w-full bg-transparen mt-8">
                     <div className="w-full max-w-xl">
-                        {isLoading ? <Loading /> : children}
+                        <Suspense fallback={<Loading />}>
+                            {children}
+                        </Suspense>
                     </div>
                 </div>
 
@@ -41,12 +44,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                                             goToStep(index + 1);
                                         }
                                     }}
-                                    className={`rounded-sm flex items-center justify-center text-sm font-medium transition-all ${currentStep === index + 1
-                                        ? 'bg-blue-600 text-white px-4'
-                                        : currentStep > index + 1
-                                            ? 'bg-green-500 text-white'
-                                            : 'bg-gray-200 text-gray-600'
-                                        } ${currentStep === index + 1 ? 'w-auto' : 'w-12 h-12'} ${!isStepValid(index + 1) && currentStep !== index + 1 ? 'opacity-50 cursor-not-allowed' : 'sm:hover:scale-105'}`}
+                                    className={getStepButtonClass(currentStep, index + 1, isStepValid(index + 1))}
                                 >
                                     {currentStep === index + 1 ? (
                                         <div className="flex items-center gap-2 py-2">
@@ -94,4 +92,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             </div>
         </div>
     );
+}
+
+function getStepButtonClass(currentStep: number, stepIndex: number, isValid: boolean) {
+    const baseClasses = 'rounded-sm flex items-center justify-center text-sm font-medium transition-all';
+    const isCurrent = currentStep === stepIndex;
+    const isCompleted = currentStep > stepIndex || isValid;
+
+    if (isCurrent) {
+        return `${baseClasses} bg-blue-600 text-white px-4 h-12`;
+    }
+    if (isCompleted) {
+        return `${baseClasses} bg-green-500 text-white w-12 h-12`;
+    }
+    return `${baseClasses} bg-gray-200 text-gray-600 w-12 h-12 ${!isValid ? 'opacity-50 cursor-not-allowed' : ''}`;
 } 

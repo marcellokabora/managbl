@@ -1,41 +1,7 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply font-sans antialiased;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-}
-
-/* Typography styles */
-.prose {
-  max-width: none;
-}
-
-.prose h1,
-.prose h2,
-.prose h3,
-.prose h4 {
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-  font-weight: bold;
-}
-
-.prose code {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.875rem;
-}
-
-.prose pre {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
 }
