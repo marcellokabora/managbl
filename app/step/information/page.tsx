@@ -3,63 +3,45 @@
 import { useState, useEffect } from "react";
 import { useStepper } from "@/app/context/StepperContext";
 import { useBusinessDetailsStore } from "@/app/store/businessDetailsStore";
+import { businessInfoSchema, type BusinessInfoFormData } from "@/app/lib/validation";
+import { z } from "zod";
 
 export default function Information() {
     const { businessName, phoneNumber, numberOfUnits, businessType,
         setBusinessName, setPhoneNumber, setNumberOfUnits, setBusinessType } = useBusinessDetailsStore();
     const { setStepValid } = useStepper();
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [errors, setErrors] = useState<Partial<Record<keyof BusinessInfoFormData, string>>>({});
     const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-    const validateField = (field: string, value: string | number) => {
-        const newErrors = { ...errors };
-
-        switch (field) {
-            case 'businessName':
-                if (!(value as string).trim()) {
-                    newErrors.businessName = "Business name is required";
-                } else {
-                    delete newErrors.businessName;
-                }
-                break;
-            case 'phoneNumber':
-                if (!(value as string).trim()) {
-                    newErrors.phoneNumber = "Phone number is required";
-                } else if ((value as string).replace(/\D/g, '').length < 7) {
-                    newErrors.phoneNumber = "Please enter a valid phone number";
-                } else {
-                    delete newErrors.phoneNumber;
-                }
-                break;
-            case 'numberOfUnits':
-                if (!value || (value as number) <= 0) {
-                    newErrors.numberOfUnits = "Number of units is required and must be greater than 0";
-                } else {
-                    delete newErrors.numberOfUnits;
-                }
-                break;
-            case 'businessType':
-                if (!value || (value as string).trim() === '') {
-                    newErrors.businessType = "Business type is required";
-                } else {
-                    delete newErrors.businessType;
-                }
-                break;
+    const validateStep = () => {
+        try {
+            const formData = {
+                businessName,
+                phoneNumber,
+                numberOfUnits,
+                businessType
+            };
+            businessInfoSchema.parse(formData);
+            setErrors({});
+            setStepValid(2, true);
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const newErrors: Partial<Record<keyof BusinessInfoFormData, string>> = {};
+                error.errors.forEach((err) => {
+                    if (err.path[0]) {
+                        newErrors[err.path[0] as keyof BusinessInfoFormData] = err.message;
+                    }
+                });
+                setErrors(newErrors);
+            }
+            setStepValid(2, false);
         }
-
-        setErrors(newErrors);
-        const isValid = Object.keys(newErrors).length === 0;
-        setStepValid(2, isValid);
     };
 
-    // Add validation when store values change
     useEffect(() => {
         if (businessName !== undefined && phoneNumber !== undefined &&
             numberOfUnits !== undefined && businessType !== undefined) {
-            validateField('businessName', businessName);
-            validateField('phoneNumber', phoneNumber);
-            validateField('numberOfUnits', numberOfUnits);
-            validateField('businessType', businessType);
+            validateStep();
         }
     }, [businessName, phoneNumber, numberOfUnits, businessType]);
 
@@ -80,26 +62,13 @@ export default function Information() {
         }
 
         if (touched[field]) {
-            validateField(field, value);
+            validateStep();
         }
     };
 
     const handleBlur = (field: string) => {
         setTouched(prev => ({ ...prev, [field]: true }));
-        switch (field) {
-            case 'businessName':
-                validateField(field, businessName);
-                break;
-            case 'phoneNumber':
-                validateField(field, phoneNumber);
-                break;
-            case 'numberOfUnits':
-                validateField(field, numberOfUnits);
-                break;
-            case 'businessType':
-                validateField(field, businessType);
-                break;
-        }
+        validateStep();
     };
 
     return (

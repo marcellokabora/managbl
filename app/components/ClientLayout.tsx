@@ -1,12 +1,36 @@
 "use client";
 
 import { useStepper } from "@/app/context/StepperContext";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Loading from "./Loading";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
     const { currentStep, goToNextStep, goToPreviousStep, goToStep, steps, totalSteps, isStepValid } = useStepper();
     const currentStepInfo = steps[currentStep - 1];
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const handleNextStep = () => {
+        if (currentStep === totalSteps) {
+            alert('Congratulations! You have completed all steps.');
+        } else {
+            setIsLoading(true);
+            const nextStep = currentStep + 1;
+            const nextStepInfo = steps[nextStep - 1];
+            if (nextStepInfo?.link) {
+                router.push(nextStepInfo.link);
+            } else {
+                goToNextStep();
+                setIsLoading(false);
+            }
+        }
+    };
+
+    useEffect(() => {
+        setIsLoading(false);
+    }, [pathname]);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -75,17 +99,21 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                             Previous
                         </button>
                         <button
-                            onClick={() => {
-                                if (currentStep === totalSteps) {
-                                    alert('Congratulations! You have completed all steps.');
-                                } else {
-                                    goToNextStep();
-                                }
-                            }}
-                            disabled={!isStepValid(currentStep)}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none"
+                            onClick={handleNextStep}
+                            disabled={!isStepValid(currentStep) || isLoading}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-sm hover:bg-blue-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none flex items-center justify-center gap-2"
                         >
-                            {currentStep === totalSteps ? 'Confirm' : 'Next'}
+                            {isLoading ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Loading...
+                                </>
+                            ) : (
+                                currentStep === totalSteps ? 'Confirm' : 'Next'
+                            )}
                         </button>
                     </div>
                 </div>

@@ -3,143 +3,84 @@
 import { useState, useEffect } from "react";
 import { useStepper } from "@/app/context/StepperContext";
 import { useCreateAccountStore } from "@/app/store/createAccountStore";
-
-const MOCKED_EMAILS = [
-    "user1@example.com",
-    "user2@example.com",
-    "user3@example.com",
-    "test@example.com",
-    "admin@example.com"
-];
-
-const validateEmail = (email: string) => {
-    if (!email) {
-        return { isValid: false, error: "Email is required" };
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return { isValid: false, error: "Please enter a valid email address" };
-    }
-    if (MOCKED_EMAILS.includes(email)) {
-        return { isValid: false, error: "This email is not allowed" };
-    }
-    return { isValid: true };
-};
+import { accountSchema, type AccountFormData } from "@/app/lib/validation";
+import { z } from "zod";
 
 export default function Account() {
     const { email, password, isMagicLink, setEmail, setPassword, setIsMagicLink } = useCreateAccountStore();
-    const [error, setError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
+    const [errors, setErrors] = useState<Partial<Record<keyof AccountFormData, string>>>({});
     const { setStepValid } = useStepper();
 
-    const emailValidation = validateEmail(email);
-
-    const validateStep = (email: string, password: string, isMagicLink: boolean) => {
-        if (!emailValidation.isValid) {
+    const validateStep = () => {
+        try {
+            const formData = {
+                email,
+                password: isMagicLink ? undefined : password,
+                isMagicLink
+            };
+            accountSchema.parse(formData);
+            setErrors({});
+            setStepValid(1, true);
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const newErrors: Partial<Record<keyof AccountFormData, string>> = {};
+                error.errors.forEach((err) => {
+                    if (err.path[0]) {
+                        newErrors[err.path[0] as keyof AccountFormData] = err.message;
+                    }
+                });
+                setErrors(newErrors);
+            }
             setStepValid(1, false);
-            return;
         }
-
-        if (!isMagicLink && !password) {
-            setPasswordError("Please set a password or use magic link");
-            setStepValid(1, false);
-            return;
-        }
-
-        if (!isMagicLink && passwordError) {
-            setStepValid(1, false);
-            return;
-        }
-
-        setStepValid(1, true);
     };
 
     useEffect(() => {
         if (email !== undefined && password !== undefined && isMagicLink !== undefined) {
-            validateStep(email, password, isMagicLink);
+            validateStep();
         }
     }, [email, password, isMagicLink]);
 
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newEmail = e.target.value;
         setEmail(newEmail);
-
-        const validationResult = validateEmail(newEmail);
-        if (!validationResult.isValid) {
-            setError(validationResult.error || "");
-            setStepValid(1, false);
-        } else {
-            setError("");
-            validateStep(newEmail, password, isMagicLink);
-        }
+        validateStep();
     };
 
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newPassword = e.target.value;
         setPassword(newPassword);
-
-        if (!isMagicLink && newPassword) {
-            if (newPassword.length < 8) {
-                setPasswordError("Password must be at least 8 characters long");
-                setStepValid(1, false);
-            } else {
-                setPasswordError("");
-                validateStep(email, newPassword, isMagicLink);
-            }
-        } else {
-            setPasswordError("");
-            validateStep(email, newPassword, isMagicLink);
-        }
+        validateStep();
     };
 
     const handleMagicLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.checked;
-        setIsMagicLink(newValue);
-        if (newValue) {
-            setPasswordError("");
-            validateStep(email, password, newValue);
-        } else if (password) {
-            handlePasswordChange({ target: { value: password } } as React.ChangeEvent<HTMLInputElement>);
-        } else {
-            validateStep(email, password, newValue);
-        }
+        const newIsMagicLink = e.target.checked;
+        setIsMagicLink(newIsMagicLink);
+        validateStep();
     };
 
     return (
         <form className="space-y-4">
             <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address
+                    Email
                 </label>
                 <input
                     type="email"
                     id="email"
                     value={email}
                     onChange={handleEmailChange}
-                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${error ? "border-red-500" : "border-gray-300"
+                    className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${errors.email ? "border-red-500" : "border-gray-300"
                         }`}
                     placeholder="Enter your email"
+                    autoComplete="off"
                 />
-                {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+                {errors.email && (
+                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                )}
             </div>
 
-            {!isMagicLink && (
-                <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                        Password (optional)
-                    </label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={handlePasswordChange}
-                        className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${passwordError ? "border-red-500" : "border-gray-300"}`}
-                        placeholder="Enter your password"
-                    />
-                    {passwordError && <p className="mt-1 text-sm text-red-600">{passwordError}</p>}
-                </div>
-            )}
-
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center mb-4">
                 <input
                     type="checkbox"
                     id="magicLink"
@@ -147,10 +88,31 @@ export default function Account() {
                     onChange={handleMagicLinkChange}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <label htmlFor="magicLink" className="text-sm text-gray-700">
-                    Use Magic Link instead of password
+                <label htmlFor="magicLink" className="ml-2 block text-sm text-gray-900">
+                    Use Magic Link for login
                 </label>
             </div>
+
+            {!isMagicLink && (
+                <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                        Password
+                    </label>
+                    <input
+                        type="password"
+                        id="password"
+                        value={password}
+                        onChange={handlePasswordChange}
+                        className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 ${errors.password ? "border-red-500" : "border-gray-300"
+                            }`}
+                        placeholder="Enter your password"
+                        autoComplete="off"
+                    />
+                    {errors.password && (
+                        <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                    )}
+                </div>
+            )}
         </form>
     );
 } 

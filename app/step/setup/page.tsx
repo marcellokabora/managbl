@@ -3,56 +3,43 @@
 import { useState, useEffect } from "react";
 import { useStepper } from "@/app/context/StepperContext";
 import { usePhoneConfigStore } from "@/app/store/phoneConfigStore";
+import { phoneConfigSchema, type PhoneConfigFormData } from "@/app/lib/validation";
+import { z } from "zod";
 
 export default function Step3() {
     const { announcement, forwardingNumber, isTested,
         setAnnouncement, setForwardingNumber, setIsTested } = usePhoneConfigStore();
     const { setStepValid } = useStepper();
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [errors, setErrors] = useState<Partial<Record<keyof PhoneConfigFormData, string>>>({});
     const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-    const validateField = (field: string, value: string | boolean) => {
-        const newErrors = { ...errors };
-
-        switch (field) {
-            case 'announcement':
-                if (!(value as string).trim()) {
-                    newErrors.announcement = "Announcement is required";
-                } else if ((value as string).length < 10) {
-                    newErrors.announcement = "Announcement must be at least 10 characters";
-                } else {
-                    delete newErrors.announcement;
-                }
-                break;
-            case 'forwardingNumber':
-                if (!(value as string).trim()) {
-                    newErrors.forwardingNumber = "Forwarding number is required";
-                } else if ((value as string).replace(/\D/g, '').length < 7) {
-                    newErrors.forwardingNumber = "Please enter a valid phone number";
-                } else {
-                    delete newErrors.forwardingNumber;
-                }
-                break;
-            case 'isTested':
-                if (!value) {
-                    newErrors.isTested = "Please test the configuration before proceeding";
-                } else {
-                    delete newErrors.isTested;
-                }
-                break;
+    const validateStep = () => {
+        try {
+            const formData = {
+                announcement,
+                forwardingNumber,
+                isTested
+            };
+            phoneConfigSchema.parse(formData);
+            setErrors({});
+            setStepValid(3, true);
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                const newErrors: Partial<Record<keyof PhoneConfigFormData, string>> = {};
+                error.errors.forEach((err) => {
+                    if (err.path[0]) {
+                        newErrors[err.path[0] as keyof PhoneConfigFormData] = err.message;
+                    }
+                });
+                setErrors(newErrors);
+            }
+            setStepValid(3, false);
         }
-
-        setErrors(newErrors);
-        const isValid = Object.keys(newErrors).length === 0;
-        setStepValid(3, isValid);
     };
 
-    // Add validation when store values change
     useEffect(() => {
         if (announcement !== undefined && forwardingNumber !== undefined && isTested !== undefined) {
-            validateField('announcement', announcement);
-            validateField('forwardingNumber', forwardingNumber);
-            validateField('isTested', isTested);
+            validateStep();
         }
     }, [announcement, forwardingNumber, isTested]);
 
@@ -70,29 +57,19 @@ export default function Step3() {
         }
 
         if (touched[field]) {
-            validateField(field, value);
+            validateStep();
         }
     };
 
     const handleBlur = (field: string) => {
         setTouched(prev => ({ ...prev, [field]: true }));
-        switch (field) {
-            case 'announcement':
-                validateField(field, announcement);
-                break;
-            case 'forwardingNumber':
-                validateField(field, forwardingNumber);
-                break;
-            case 'isTested':
-                validateField(field, isTested);
-                break;
-        }
+        validateStep();
     };
 
     const handleTestConfiguration = () => {
         // Simulate testing the configuration
         setIsTested(true);
-        validateField('isTested', true);
+        validateStep();
     };
 
     return (
