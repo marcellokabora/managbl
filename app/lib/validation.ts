@@ -9,6 +9,15 @@ const MOCKED_EMAILS = [
     "admin@example.com"
 ];
 
+// Mocked phone numbers for validation
+const MOCKED_PHONE_NUMBERS = [
+    "1234567890",
+    "0987654321",
+    "5555555555",
+    "1112223333",
+    "9998887777"
+];
+
 // Account validation schema
 export const accountSchema = z.object({
     email: z.string()
@@ -42,8 +51,14 @@ export const businessInfoSchema = z.object({
     phoneNumber: z.string()
         .min(1, "Phone number is required")
         .transform((val) => val.replace(/\D/g, ''))
-        .refine((val) => val.length >= 7, {
-            message: "Please enter a valid phone number"
+        .refine((val) => val.length >= 10, {
+            message: "Phone number must be at least 10 digits"
+        })
+        .refine((val) => val.length <= 15, {
+            message: "Phone number must be less than 15 digits"
+        })
+        .refine((val) => !MOCKED_PHONE_NUMBERS.includes(val), {
+            message: "This phone number is not allowed"
         }),
     numberOfUnits: z.number()
         .min(1, "Number of units must be greater than 0")
@@ -65,8 +80,14 @@ export const phoneConfigSchema = z.object({
     forwardingNumber: z.string()
         .min(1, "Forwarding number is required")
         .transform((val) => val.replace(/\D/g, ''))
-        .refine((val) => val.length >= 7, {
-            message: "Please enter a valid phone number"
+        .refine((val) => val.length >= 10, {
+            message: "Forwarding number must be at least 10 digits"
+        })
+        .refine((val) => val.length <= 15, {
+            message: "Forwarding number must be less than 15 digits"
+        })
+        .refine((val) => !MOCKED_PHONE_NUMBERS.includes(val), {
+            message: "This phone number is not allowed"
         }),
     isTested: z.boolean()
         .refine((val) => val === true, {
