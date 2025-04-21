@@ -42,11 +42,6 @@ export function StepperProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const stepFromUrl = steps.findIndex(step => step.link === pathname) + 1;
         if (stepFromUrl > 0) {
-            // If trying to access any step other than step 1 directly, redirect to step 1
-            if (stepFromUrl > 1 && !isStepValid(1)) {
-                router.push('/step/account');
-                return;
-            }
             setCurrentStep(stepFromUrl);
         }
     }, [pathname]);
