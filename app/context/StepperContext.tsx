@@ -30,9 +30,9 @@ export function StepperProvider({ children }: { children: ReactNode }) {
 
     const steps: StepInfo[] = [
         { link: '/step/account', title: 'Account', subtitle: 'Set up your account details' },
-        { link: '/step/information', title: 'Basic Information', subtitle: 'Enter your name, phone number, and number of units' },
-        { link: '/step/setup', title: 'Phone Configuration', subtitle: 'Set up initial phone answering settings' },
-        { link: '/step/review', title: 'Admin Access', subtitle: 'Complete setup and access admin dashboard' },
+        { link: '/step/information', title: 'Information', subtitle: 'Enter your basic informations' },
+        { link: '/step/setup', title: 'Configuration', subtitle: 'Set up initial phone settings' },
+        { link: '/step/review', title: 'Review', subtitle: 'Review and confirm your setup' },
     ];
 
     const totalSteps = steps.length;
