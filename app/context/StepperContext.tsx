@@ -32,7 +32,8 @@ export function StepperProvider({ children }: { children: ReactNode }) {
         { link: '/step/account', title: 'Account', subtitle: 'Set up your account details' },
         { link: '/step/information', title: 'Information', subtitle: 'Enter your basic informations' },
         { link: '/step/setup', title: 'Configuration', subtitle: 'Set up initial phone settings' },
-        { link: '/step/review', title: 'Review', subtitle: 'Review and confirm your setup' },
+        // { link: '/step/review', title: 'Review', subtitle: 'Review and confirm your setup' },
+        { link: '/step/confirmation', title: 'Confirmation', subtitle: 'Your setup is complete' },
     ];
 
     const totalSteps = steps.length;
@@ -63,6 +64,11 @@ export function StepperProvider({ children }: { children: ReactNode }) {
 
     const goToNextStep = () => {
         if (currentStep < totalSteps && isStepValid(currentStep)) {
+            // Don't allow going forward from confirmation step
+            const confirmationStepIndex = steps.findIndex(step => step.link === '/step/confirmation') + 1;
+            if (currentStep === confirmationStepIndex) {
+                return;
+            }
             const nextStep = currentStep + 1;
             setCurrentStep(nextStep);
             router.push(steps[nextStep - 1].link, { scroll: false });

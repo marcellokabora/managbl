@@ -9,7 +9,8 @@ import { z } from "zod";
 export default function Account() {
     const { email, password, isMagicLink, setEmail, setPassword, setIsMagicLink } = useCreateAccountStore();
     const [errors, setErrors] = useState<Partial<Record<keyof AccountFormData, string>>>({});
-    const { setStepValid } = useStepper();
+    const [touched, setTouched] = useState<Partial<Record<keyof AccountFormData, boolean>>>({});
+    const { setStepValid, currentStep } = useStepper();
 
     const validateStep = () => {
         try {
@@ -20,18 +21,21 @@ export default function Account() {
             };
             accountSchema.parse(formData);
             setErrors({});
-            setStepValid(1, true);
+            setStepValid(currentStep, true);
         } catch (error) {
             if (error instanceof z.ZodError) {
                 const newErrors: Partial<Record<keyof AccountFormData, string>> = {};
                 error.errors.forEach((err) => {
                     if (err.path[0]) {
-                        newErrors[err.path[0] as keyof AccountFormData] = err.message;
+                        const field = err.path[0] as keyof AccountFormData;
+                        if (touched[field]) {
+                            newErrors[field] = err.message;
+                        }
                     }
                 });
                 setErrors(newErrors);
             }
-            setStepValid(1, false);
+            setStepValid(currentStep, false);
         }
     };
 
@@ -39,23 +43,26 @@ export default function Account() {
         if (email !== undefined && password !== undefined && isMagicLink !== undefined) {
             validateStep();
         }
-    }, [email, password, isMagicLink]);
+    }, [email, password, isMagicLink, currentStep]);
 
     const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newEmail = e.target.value;
         setEmail(newEmail);
+        setTouched(prev => ({ ...prev, email: true }));
         validateStep();
     };
 
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newPassword = e.target.value;
         setPassword(newPassword);
+        setTouched(prev => ({ ...prev, password: true }));
         validateStep();
     };
 
     const handleMagicLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newIsMagicLink = e.target.checked;
         setIsMagicLink(newIsMagicLink);
+        setTouched(prev => ({ ...prev, isMagicLink: true }));
         validateStep();
     };
 

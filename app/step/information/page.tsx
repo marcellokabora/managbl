@@ -9,7 +9,7 @@ import { z } from "zod";
 export default function Information() {
     const { businessName, phoneNumber, numberOfUnits, businessType,
         setBusinessName, setPhoneNumber, setNumberOfUnits, setBusinessType } = useBusinessDetailsStore();
-    const { setStepValid } = useStepper();
+    const { setStepValid, currentStep } = useStepper();
     const [errors, setErrors] = useState<Partial<Record<keyof BusinessInfoFormData, string>>>({});
     const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -23,7 +23,7 @@ export default function Information() {
             };
             businessInfoSchema.parse(formData);
             setErrors({});
-            setStepValid(2, true);
+            setStepValid(currentStep, true);
         } catch (error) {
             if (error instanceof z.ZodError) {
                 const newErrors: Partial<Record<keyof BusinessInfoFormData, string>> = {};
@@ -34,7 +34,7 @@ export default function Information() {
                 });
                 setErrors(newErrors);
             }
-            setStepValid(2, false);
+            setStepValid(currentStep, false);
         }
     };
 
@@ -43,7 +43,7 @@ export default function Information() {
             numberOfUnits !== undefined && businessType !== undefined) {
             validateStep();
         }
-    }, [businessName, phoneNumber, numberOfUnits, businessType]);
+    }, [businessName, phoneNumber, numberOfUnits, businessType, currentStep]);
 
     const handleInputChange = (field: string, value: string | number) => {
         switch (field) {
